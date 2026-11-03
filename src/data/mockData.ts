@@ -1,0 +1,341 @@
+import { ExamHall, Student, Invigilator, ExamSession, Desk } from '../types/seating';
+
+export const INITIAL_EXAM_SESSIONS: ExamSession[] = [
+  {
+    id: 'session-1',
+    code: 'SEM-V-FINALS-2026',
+    title: 'Autumn Semester End-Term Examinations 2026',
+    date: '2026-11-12',
+    timeSlot: '09:30 AM – 12:30 PM',
+    duration: '3 Hours',
+    semester: 'Semester V (Undergraduate)',
+    chiefSuperintendent: 'Prof. Donald E. Knuth, Vice Dean of Academics',
+  },
+  {
+    id: 'session-2',
+    code: 'SEM-III-FINALS-2026',
+    title: 'Sophomore Core Comprehensive Examinations',
+    date: '2026-11-12',
+    timeSlot: '02:00 PM – 05:00 PM',
+    duration: '3 Hours',
+    semester: 'Semester III',
+    chiefSuperintendent: 'Dr. Evelyn Boyd Granville',
+  },
+  {
+    id: 'session-3',
+    code: 'POSTGRAD-ADV-2026',
+    title: 'Postgraduate & Doctoral Qualifying Examination',
+    date: '2026-11-13',
+    timeSlot: '10:00 AM – 01:00 PM',
+    duration: '3 Hours',
+    semester: 'Postgraduate Division',
+    chiefSuperintendent: 'Prof. Claude Shannon',
+  },
+];
+
+function generateDesksForHall(hallId: string, rows: string[], cols: number, aisleAfterCols: number[], brokenList: string[] = []): Desk[] {
+  const desks: Desk[] = [];
+  for (const r of rows) {
+    for (let c = 1; c <= cols; c++) {
+      const colStr = c < 10 ? `0${c}` : `${c}`;
+      const label = `${r}-${colStr}`;
+      const id = `${hallId}-${label}`;
+      const isBroken = brokenList.includes(label);
+      desks.push({
+        id,
+        hallId,
+        row: r,
+        col: c,
+        label,
+        isAisleRight: aisleAfterCols.includes(c),
+        isBroken,
+        studentId: null,
+      });
+    }
+  }
+  return desks;
+}
+
+export const INITIAL_HALLS: ExamHall[] = [
+  {
+    id: 'hall-a',
+    name: 'Turing Auditorium (Hall A)',
+    building: 'Alan Turing Science Tower',
+    floor: 'Floor 1, West Wing',
+    rows: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
+    cols: 12,
+    aisleAfterCols: [4, 8],
+    totalCapacity: 96,
+    activeCapacity: 94,
+    desks: generateDesksForHall('hall-a', ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'], 12, [4, 8], ['B-07', 'F-03']),
+  },
+  {
+    id: 'hall-b',
+    name: 'Lovelace Hall (Hall B)',
+    building: 'Ada Lovelace Mathematical Block',
+    floor: 'Ground Floor, North Atrium',
+    rows: ['A', 'B', 'C', 'D', 'E', 'F'],
+    cols: 12,
+    aisleAfterCols: [4, 8],
+    totalCapacity: 72,
+    activeCapacity: 71,
+    desks: generateDesksForHall('hall-b', ['A', 'B', 'C', 'D', 'E', 'F'], 12, [4, 8], ['C-11']),
+  },
+  {
+    id: 'hall-c',
+    name: 'Shannon Complex (Hall C)',
+    building: 'Information Theory Pavilion',
+    floor: 'Floor 2, Central Wing',
+    rows: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'],
+    cols: 12,
+    aisleAfterCols: [4, 8],
+    totalCapacity: 120,
+    activeCapacity: 119,
+    desks: generateDesksForHall('hall-c', ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'], 12, [4, 8], ['E-01']),
+  },
+  {
+    id: 'hall-d',
+    name: 'Hopper Laboratory (Hall D)',
+    building: 'Grace Hopper Computing Annex',
+    floor: 'Floor 3, South Quad',
+    rows: ['A', 'B', 'C', 'D', 'E', 'F'],
+    cols: 8,
+    aisleAfterCols: [4],
+    totalCapacity: 48,
+    activeCapacity: 48,
+    desks: generateDesksForHall('hall-d', ['A', 'B', 'C', 'D', 'E', 'F'], 8, [4]),
+  },
+];
+
+const RAW_STUDENTS = [
+  // Computer Science (CS301)
+  { name: 'Aiden Vance', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'None' },
+  { name: 'Beatrice Chen', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'None' },
+  { name: 'Caleb Montgomery', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'Wheelchair Access' },
+  { name: 'Daphne Sterling', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'None' },
+  { name: 'Ethan Zhao', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'Extra Time (+30m)' },
+  { name: 'Fiona Gallagher', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'None' },
+  { name: 'Gregory O’Connor', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'None' },
+  { name: 'Helena Rostova', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'None' },
+  { name: 'Ian MacLeod', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'None' },
+  { name: 'Jasmine Patel', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'None' },
+  { name: 'Kieran Scott', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'None' },
+  { name: 'Lucia Morales', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'None' },
+  { name: 'Marcus Aurelius Vance', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'Wheelchair Access' },
+  { name: 'Nadia Solis', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'None' },
+  { name: 'Oliver Twist-Ramirez', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'None' },
+  { name: 'Priya Sharma', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'Extra Time (+30m)' },
+  { name: 'Quentin Blake', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'None' },
+  { name: 'Renee Dupont', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'None' },
+  { name: 'Sebastian Choi', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'None' },
+  { name: 'Tara Washington', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'None' },
+  { name: 'Umar Farooq', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'None' },
+  { name: 'Valerie Pierce', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'None' },
+  { name: 'Wyatt Thorne', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'None' },
+  { name: 'Xavier Lindqvist', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'Quiet Perimeter' },
+  { name: 'Yara Al-Mansoor', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'None' },
+  { name: 'Zachary Knight', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'None' },
+  { name: 'Ananya Mukherjee', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'None' },
+  { name: 'Bradley Cooper-Smith', dept: 'Computer Science', code: 'CS301', course: 'Distributed Systems & Consensus', accomm: 'None' },
+
+  // Electrical Eng (EE204)
+  { name: 'Alexander Wright', dept: 'Electrical Eng', code: 'EE204', course: 'Signals, Systems & DSP', accomm: 'None' },
+  { name: 'Brianna Hayes', dept: 'Electrical Eng', code: 'EE204', course: 'Signals, Systems & DSP', accomm: 'None' },
+  { name: 'Cameron Diaz-Reyes', dept: 'Electrical Eng', code: 'EE204', course: 'Signals, Systems & DSP', accomm: 'None' },
+  { name: 'David K. Lawson', dept: 'Electrical Eng', code: 'EE204', course: 'Signals, Systems & DSP', accomm: 'Wheelchair Access' },
+  { name: 'Elena Volkova', dept: 'Electrical Eng', code: 'EE204', course: 'Signals, Systems & DSP', accomm: 'None' },
+  { name: 'Franklin Pierce', dept: 'Electrical Eng', code: 'EE204', course: 'Signals, Systems & DSP', accomm: 'None' },
+  { name: 'Giselle Laurent', dept: 'Electrical Eng', code: 'EE204', course: 'Signals, Systems & DSP', accomm: 'Extra Time (+30m)' },
+  { name: 'Harvey Specter-Ross', dept: 'Electrical Eng', code: 'EE204', course: 'Signals, Systems & DSP', accomm: 'None' },
+  { name: 'Isabella Rossi', dept: 'Electrical Eng', code: 'EE204', course: 'Signals, Systems & DSP', accomm: 'None' },
+  { name: 'Jonathan Brand', dept: 'Electrical Eng', code: 'EE204', course: 'Signals, Systems & DSP', accomm: 'None' },
+  { name: 'Katarina Petrov', dept: 'Electrical Eng', code: 'EE204', course: 'Signals, Systems & DSP', accomm: 'None' },
+  { name: 'Lucas Meyer', dept: 'Electrical Eng', code: 'EE204', course: 'Signals, Systems & DSP', accomm: 'None' },
+  { name: 'Mei-Ling Zhou', dept: 'Electrical Eng', code: 'EE204', course: 'Signals, Systems & DSP', accomm: 'None' },
+  { name: 'Nathan Drake-Hall', dept: 'Electrical Eng', code: 'EE204', course: 'Signals, Systems & DSP', accomm: 'Quiet Perimeter' },
+  { name: 'Octavia Butler-Reed', dept: 'Electrical Eng', code: 'EE204', course: 'Signals, Systems & DSP', accomm: 'None' },
+  { name: 'Pascal Mercier', dept: 'Electrical Eng', code: 'EE204', course: 'Signals, Systems & DSP', accomm: 'None' },
+  { name: 'Qasim Ali', dept: 'Electrical Eng', code: 'EE204', course: 'Signals, Systems & DSP', accomm: 'None' },
+  { name: 'Rosalind Franklin-Park', dept: 'Electrical Eng', code: 'EE204', course: 'Signals, Systems & DSP', accomm: 'Wheelchair Access' },
+  { name: 'Stefan Salvatore', dept: 'Electrical Eng', code: 'EE204', course: 'Signals, Systems & DSP', accomm: 'None' },
+  { name: 'Theresa Mayfair', dept: 'Electrical Eng', code: 'EE204', course: 'Signals, Systems & DSP', accomm: 'None' },
+  { name: 'Uriah Heep-Sinclair', dept: 'Electrical Eng', code: 'EE204', course: 'Signals, Systems & DSP', accomm: 'None' },
+  { name: 'Vivian Westwood-Cole', dept: 'Electrical Eng', code: 'EE204', course: 'Signals, Systems & DSP', accomm: 'None' },
+  { name: 'Winston Churchill-Cox', dept: 'Electrical Eng', code: 'EE204', course: 'Signals, Systems & DSP', accomm: 'None' },
+  { name: 'Xiomara Castro', dept: 'Electrical Eng', code: 'EE204', course: 'Signals, Systems & DSP', accomm: 'None' },
+
+  // Mechanical Eng (ME312)
+  { name: 'Arthur Pendelton', dept: 'Mechanical Eng', code: 'ME312', course: 'Thermodynamics & Fluid Dynamics', accomm: 'None' },
+  { name: 'Bianca Castiglione', dept: 'Mechanical Eng', code: 'ME312', course: 'Thermodynamics & Fluid Dynamics', accomm: 'None' },
+  { name: 'Charles Babbage-Kim', dept: 'Mechanical Eng', code: 'ME312', course: 'Thermodynamics & Fluid Dynamics', accomm: 'None' },
+  { name: 'Diana Prince-Wayne', dept: 'Mechanical Eng', code: 'ME312', course: 'Thermodynamics & Fluid Dynamics', accomm: 'Quiet Perimeter' },
+  { name: 'Edward Elric-Vance', dept: 'Mechanical Eng', code: 'ME312', course: 'Thermodynamics & Fluid Dynamics', accomm: 'None' },
+  { name: 'Fatima Al-Zahra', dept: 'Mechanical Eng', code: 'ME312', course: 'Thermodynamics & Fluid Dynamics', accomm: 'None' },
+  { name: 'Geoffrey Hinton-Roy', dept: 'Mechanical Eng', code: 'ME312', course: 'Thermodynamics & Fluid Dynamics', accomm: 'None' },
+  { name: 'Hannah Abbott-Frost', dept: 'Mechanical Eng', code: 'ME312', course: 'Thermodynamics & Fluid Dynamics', accomm: 'Extra Time (+30m)' },
+  { name: 'Isaac Newton-Seng', dept: 'Mechanical Eng', code: 'ME312', course: 'Thermodynamics & Fluid Dynamics', accomm: 'None' },
+  { name: 'Julia Roberts-Dean', dept: 'Mechanical Eng', code: 'ME312', course: 'Thermodynamics & Fluid Dynamics', accomm: 'None' },
+  { name: 'Kenneth Branagh-Liu', dept: 'Mechanical Eng', code: 'ME312', course: 'Thermodynamics & Fluid Dynamics', accomm: 'None' },
+  { name: 'Leila Khaled-Noor', dept: 'Mechanical Eng', code: 'ME312', course: 'Thermodynamics & Fluid Dynamics', accomm: 'Wheelchair Access' },
+  { name: 'Malcolm Reynolds', dept: 'Mechanical Eng', code: 'ME312', course: 'Thermodynamics & Fluid Dynamics', accomm: 'None' },
+  { name: 'Nora Ephron-Sloan', dept: 'Mechanical Eng', code: 'ME312', course: 'Thermodynamics & Fluid Dynamics', accomm: 'None' },
+  { name: 'Oscar Wilde-Tang', dept: 'Mechanical Eng', code: 'ME312', course: 'Thermodynamics & Fluid Dynamics', accomm: 'None' },
+  { name: 'Penelope Cruz-Vera', dept: 'Mechanical Eng', code: 'ME312', course: 'Thermodynamics & Fluid Dynamics', accomm: 'None' },
+  { name: 'Quincy Jones-Wu', dept: 'Mechanical Eng', code: 'ME312', course: 'Thermodynamics & Fluid Dynamics', accomm: 'None' },
+  { name: 'Rowan Atkinson-Bose', dept: 'Mechanical Eng', code: 'ME312', course: 'Thermodynamics & Fluid Dynamics', accomm: 'None' },
+  { name: 'Siddhartha Gautama-Das', dept: 'Mechanical Eng', code: 'ME312', course: 'Thermodynamics & Fluid Dynamics', accomm: 'None' },
+  { name: 'Talia al Ghul-Nair', dept: 'Mechanical Eng', code: 'ME312', course: 'Thermodynamics & Fluid Dynamics', accomm: 'None' },
+
+  // Mathematics (MATH205)
+  { name: 'Ada Byron-King', dept: 'Mathematics', code: 'MATH205', course: 'Discrete Math & Combinatorics', accomm: 'None' },
+  { name: 'Bernhard Riemann-Fox', dept: 'Mathematics', code: 'MATH205', course: 'Discrete Math & Combinatorics', accomm: 'None' },
+  { name: 'Carl Friedrich Gauss-Li', dept: 'Mathematics', code: 'MATH205', course: 'Discrete Math & Combinatorics', accomm: 'None' },
+  { name: 'David Hilbert-Vance', dept: 'Mathematics', code: 'MATH205', course: 'Discrete Math & Combinatorics', accomm: 'Extra Time (+30m)' },
+  { name: 'Emmy Noether-Kaur', dept: 'Mathematics', code: 'MATH205', course: 'Discrete Math & Combinatorics', accomm: 'None' },
+  { name: 'Fibonacci Bonacci-Rao', dept: 'Mathematics', code: 'MATH205', course: 'Discrete Math & Combinatorics', accomm: 'None' },
+  { name: 'Godfrey Harold Hardy', dept: 'Mathematics', code: 'MATH205', course: 'Discrete Math & Combinatorics', accomm: 'None' },
+  { name: 'Henri Poincare-Dubois', dept: 'Mathematics', code: 'MATH205', course: 'Discrete Math & Combinatorics', accomm: 'Quiet Perimeter' },
+  { name: 'Irinel Popescu', dept: 'Mathematics', code: 'MATH205', course: 'Discrete Math & Combinatorics', accomm: 'None' },
+  { name: 'John von Neumann-Cho', dept: 'Mathematics', code: 'MATH205', course: 'Discrete Math & Combinatorics', accomm: 'Wheelchair Access' },
+  { name: 'Kurt Gödel-Mishra', dept: 'Mathematics', code: 'MATH205', course: 'Discrete Math & Combinatorics', accomm: 'None' },
+  { name: 'Leonhard Euler-Schmidt', dept: 'Mathematics', code: 'MATH205', course: 'Discrete Math & Combinatorics', accomm: 'None' },
+  { name: 'Maryam Mirzakhani-Tehrani', dept: 'Mathematics', code: 'MATH205', course: 'Discrete Math & Combinatorics', accomm: 'None' },
+  { name: 'Niels Henrik Abel-Olsen', dept: 'Mathematics', code: 'MATH205', course: 'Discrete Math & Combinatorics', accomm: 'None' },
+  { name: 'Olga Ladyzhenskaya-Vass', dept: 'Mathematics', code: 'MATH205', course: 'Discrete Math & Combinatorics', accomm: 'None' },
+  { name: 'Paul Erdős-Horvath', dept: 'Mathematics', code: 'MATH205', course: 'Discrete Math & Combinatorics', accomm: 'None' },
+  { name: 'Qian Xuesen-Zhang', dept: 'Mathematics', code: 'MATH205', course: 'Discrete Math & Combinatorics', accomm: 'None' },
+  { name: 'Ramanujan Srinivasa-Iyer', dept: 'Mathematics', code: 'MATH205', course: 'Discrete Math & Combinatorics', accomm: 'None' },
+
+  // Biotechnology (BIO110)
+  { name: 'Alice Ball-Caldwell', dept: 'Biotechnology', code: 'BIO110', course: 'Molecular Biology & Genetics', accomm: 'None' },
+  { name: 'Barbara McClintock-Lee', dept: 'Biotechnology', code: 'BIO110', course: 'Molecular Biology & Genetics', accomm: 'None' },
+  { name: 'Craig Venter-Adams', dept: 'Biotechnology', code: 'BIO110', course: 'Molecular Biology & Genetics', accomm: 'None' },
+  { name: 'Dorothy Hodgkin-Crow', dept: 'Biotechnology', code: 'BIO110', course: 'Molecular Biology & Genetics', accomm: 'Extra Time (+30m)' },
+  { name: 'Elizabeth Blackburn-Wong', dept: 'Biotechnology', code: 'BIO110', course: 'Molecular Biology & Genetics', accomm: 'Wheelchair Access' },
+  { name: 'Francis Crick-Morgan', dept: 'Biotechnology', code: 'BIO110', course: 'Molecular Biology & Genetics', accomm: 'None' },
+  { name: 'Gregor Mendel-Bauer', dept: 'Biotechnology', code: 'BIO110', course: 'Molecular Biology & Genetics', accomm: 'None' },
+  { name: 'Har Gobind Khorana-Gill', dept: 'Biotechnology', code: 'BIO110', course: 'Molecular Biology & Genetics', accomm: 'None' },
+  { name: 'Jennifer Doudna-Stern', dept: 'Biotechnology', code: 'BIO110', course: 'Molecular Biology & Genetics', accomm: 'None' },
+  { name: 'Kary Mullis-Thorne', dept: 'Biotechnology', code: 'BIO110', course: 'Molecular Biology & Genetics', accomm: 'None' },
+  { name: 'Louis Pasteur-Fontaine', dept: 'Biotechnology', code: 'BIO110', course: 'Molecular Biology & Genetics', accomm: 'None' },
+  { name: 'Marie Curie-Sklodowska', dept: 'Biotechnology', code: 'BIO110', course: 'Molecular Biology & Genetics', accomm: 'Quiet Perimeter' },
+];
+
+export const INITIAL_STUDENTS: Student[] = RAW_STUDENTS.map((s, idx) => {
+  const deptCode = s.dept === 'Computer Science' ? 'CS' :
+                   s.dept === 'Electrical Eng' ? 'EE' :
+                   s.dept === 'Mechanical Eng' ? 'ME' :
+                   s.dept === 'Mathematics' ? 'MA' : 'BT';
+  const num = (idx + 1).toString().padStart(4, '0');
+  const rollNo = `2026-${deptCode}-${num}`;
+  const email = `${s.name.toLowerCase().replace(/[^a-z]/g, '.')}.${num}@reg.university.edu`;
+  
+  return {
+    id: `stu-${idx + 1}`,
+    rollNo,
+    name: s.name,
+    email,
+    department: s.dept as any,
+    cohort: `Class of '27 (${deptCode})`,
+    courseCode: s.code,
+    courseName: s.course,
+    accommodation: s.accomm as any,
+    assignedHallId: null,
+    assignedDeskId: null,
+    assignedDeskLabel: null,
+    status: idx % 10 === 0 ? 'Verified' : idx % 15 === 0 ? 'Absent' : 'Pending Check-in',
+  };
+});
+
+export const INITIAL_INVIGILATORS: Invigilator[] = [
+  {
+    id: 'inv-1',
+    name: 'Dr. Raymond Carver',
+    facultyId: 'FAC-ENG-084',
+    department: 'Computer Science',
+    assignedHallId: 'hall-a',
+    role: 'Chief Proctor',
+    contact: '+1 (555) 019-4821',
+  },
+  {
+    id: 'inv-2',
+    name: 'Prof. Margaret Hamilton-Cole',
+    facultyId: 'FAC-SCI-112',
+    department: 'Mathematics',
+    assignedHallId: 'hall-a',
+    role: 'Invigilator',
+    contact: '+1 (555) 019-7734',
+  },
+  {
+    id: 'inv-3',
+    name: 'Dr. Alistair MacIntyre',
+    facultyId: 'FAC-ENG-204',
+    department: 'Electrical Eng',
+    assignedHallId: 'hall-a',
+    role: 'Invigilator',
+    contact: '+1 (555) 019-3389',
+  },
+  {
+    id: 'inv-4',
+    name: 'Dr. Sunita Narain',
+    facultyId: 'FAC-BIO-091',
+    department: 'Biotechnology',
+    assignedHallId: 'hall-b',
+    role: 'Chief Proctor',
+    contact: '+1 (555) 018-9902',
+  },
+  {
+    id: 'inv-5',
+    name: 'Prof. Kenneth Iverson',
+    facultyId: 'FAC-MAT-044',
+    department: 'Mathematics',
+    assignedHallId: 'hall-b',
+    role: 'Invigilator',
+    contact: '+1 (555) 018-4451',
+  },
+  {
+    id: 'inv-6',
+    name: 'Dr. Hendrik Lorentz',
+    facultyId: 'FAC-PHY-301',
+    department: 'Mechanical Eng',
+    assignedHallId: 'hall-c',
+    role: 'Chief Proctor',
+    contact: '+1 (555) 017-8820',
+  },
+  {
+    id: 'inv-7',
+    name: 'Dr. Chien-Shiung Wu',
+    facultyId: 'FAC-PHY-109',
+    department: 'Mechanical Eng',
+    assignedHallId: 'hall-c',
+    role: 'Invigilator',
+    contact: '+1 (555) 017-1234',
+  },
+  {
+    id: 'inv-8',
+    name: 'Prof. Leslie Lamport',
+    facultyId: 'FAC-ENG-019',
+    department: 'Computer Science',
+    assignedHallId: 'hall-c',
+    role: 'Invigilator',
+    contact: '+1 (555) 017-5678',
+  },
+  {
+    id: 'inv-9',
+    name: 'Dr. Barbara Liskov',
+    facultyId: 'FAC-ENG-023',
+    department: 'Computer Science',
+    assignedHallId: 'hall-d',
+    role: 'Chief Proctor',
+    contact: '+1 (555) 016-9012',
+  },
+  {
+    id: 'inv-10',
+    name: 'Dr. Paul Dirac-Jones',
+    facultyId: 'FAC-MAT-318',
+    department: 'Mathematics',
+    assignedHallId: 'hall-d',
+    role: 'Relief Officer',
+    contact: '+1 (555) 016-3478',
+  },
+];
