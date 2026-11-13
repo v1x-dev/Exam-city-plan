@@ -1,0 +1,6 @@
+{
+  "name": "Academic Seating Engine",
+  "description": "High-density examination seating orchestration and algorithmic hall assignment system for university registrars and examination officers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
